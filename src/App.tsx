@@ -1,35 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import "./App.css";
+import { useAppDispatch, useAppSelector } from "./app/hooks";
+import { amountAdded, incremented } from "./features/counter/counter_slice";
+import { useFetchBreedsQuery } from "./features/dogs/dogs_api_slice";
 
 function App() {
-  const [count, setCount] = useState(0)
+  // Counter
+  const count = useAppSelector((state) => state.counter.value);
+  const dispatch = useAppDispatch();
+  const handleClick = () => {
+    dispatch(incremented());
+  };
+
+  const handle4Click = () => {
+    dispatch(amountAdded(4));
+  };
+
+  // Dogs API
+  const [numDogs, setNumDogs] = useState(10);
+  // ? isFetching destructured from useFetchBreedsQuery
+  const { data = [] } = useFetchBreedsQuery(numDogs);
 
   return (
-    <>
+    <section>
+      <h1>Redux Toolkit</h1>
       <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <label htmlFor="dogs-select">Dogs to fetch:</label>
+        <select
+          name="dogs"
+          id="dogs-select"
+          value={numDogs}
+          onChange={(e) => setNumDogs(Number(e.target.value))}
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="15">15</option>
+          <option value="20">20</option>
+        </select>
       </div>
-      <h1>Vite + React</h1>
+      <div>
+        <p>Number of dogs fetched: {data.length}</p>
+      </div>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Picture</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((breed) => (
+              <tr key={breed.id}>
+                <td>{breed.name}</td>
+                <td>
+                  <img src={breed.image.url} alt="" height={250} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+        <button onClick={handleClick}>count is {count}</button>
+      </div>
+      <div className="card">
+        <button onClick={handle4Click}>Add 4: count is {count}</button>
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
-    </>
-  )
+    </section>
+  );
 }
 
-export default App
+export default App;
